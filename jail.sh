@@ -26,8 +26,7 @@ CONT_HOME=$HOME/Contained/jail/home
 CONT_NAME=jail:v07
 CONT_DEVICES=
 CONT_USB=
-CONT_PULSE_SERVER=172.17.0.1
-CONT_PULSE_CLIENT=172.17.0.2
+CONT_PULSE_ACL=172.17.0.0/16
 CONT_RESOLUTION=1024x768
 
 #-------------------------------------------------------------------------------
@@ -113,10 +112,20 @@ if [ ! -x $CONT_HOME/prisoner ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Set up pulse audio
+# Set up PulseAudio
 #-------------------------------------------------------------------------------
-echo -n "[i] Setting up the local PulseAudio server... "
-run "pactl load-module module-native-protocol-tcp auth-ip-acl=$CONT_PULSE_CLIENT > /dev/null 2>/dev/null"
+if [ x"$CONT_PULSE_SERVER" == x ]; then
+  IFCFG=`/sbin/ifconfig | grep 172.17`
+  CONT_PULSE_SERVER=`echo $IFCFG | awk '{print $2}' | grep 172.17`
+fi
+
+if [ x"$CONT_PULSE_SERVER" == x ]; then
+  echo "[!] Unable to auto-detect the PulseAudio server."
+  exit 1
+fi
+
+echo -n "[i] Setting up the local PulseAudio server ($CONT_PULSE_SERVER)... "
+run "pactl load-module module-native-protocol-tcp auth-ip-acl=$CONT_PULSE_ACL > /dev/null 2>/dev/null"
 CONT_ARGS="$CONT_ARGS -e PULSE_SERVER=$CONT_PULSE_SERVER"
 
 #-------------------------------------------------------------------------------
