@@ -28,6 +28,7 @@ CONT_DEVICES=
 CONT_USB=
 CONT_PULSE_SERVER=172.17.0.1
 CONT_PULSE_CLIENT=172.17.0.2
+CONT_RESOLUTION=1024x768
 
 #-------------------------------------------------------------------------------
 # Import settings from a file and build initial arguments
@@ -157,8 +158,8 @@ for i in `seq 9`; do
   fi
 done
 
-echo -n "[i] Running Xephyr display at :$JAIL_DISPLAY... "
-Xephyr :$JAIL_DISPLAY -ac -br -screen 1024x768 -resizeable > $LOG_OUT 2> $LOG_ERR &
+echo -n "[i] Running Xephyr display at :$JAIL_DISPLAY ($CONT_RESOLUTION)... "
+Xephyr :$JAIL_DISPLAY -ac -br -screen $CONT_RESOLUTION -resizeable > $LOG_OUT 2> $LOG_ERR &
 
 # wait and see if the signal is deliverable to check whether it's alive
 PID_XEPHYR=$!
