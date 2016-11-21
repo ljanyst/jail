@@ -54,7 +54,7 @@ RUN cd tmp && \
 #-------------------------------------------------------------------------------
 # Container setup
 #-------------------------------------------------------------------------------
-COPY runjail.sh /usr/bin
+COPY runjail.sh /usr/bin/runjail.sh
 
 RUN useradd -G sudo,video,plugdev -s /usr/bin/zsh prisoner
 
