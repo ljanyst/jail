@@ -23,16 +23,17 @@ to build the *Docker* image before you can do anything else, though. Go to the
 You can adjust the *Docker* tag and other things in the *jail.cfg* configuration
 file. After the docker image is ready, you can run *jail.sh*:
 
-    ]==> ./jail.sh
-    [i] Running jail: 20161121-132923
+    ]==> jail.sh
+    [i] Running jail: 20161121-220351
     [i] Container: jail:v01
     [i] Hostname: jail
     [i] Home: /home/ljanyst/Contained/jail/home
-    [i] Setting up the local PulseAudio server... OK
+    [i] Setting up the local PulseAudio server (172.17.42.1)... OK
     [i] Attaching device /dev/video0
     [i] USB device 21a9:1006 not present
-    [i] Running Xephyr display at :2... OK
-    [i] Running docker... DONE
-    [i] Killing clipboard forwarder, PID: 13453... DONE
-    [i] Killing Xephyr, PID: 13445... DONE
+    [i] Running Xephyr display at :1 (1680x1050)... OK
+    [i] Running docker... OK
+    [i] Removing container 6509664eb94f... OK
+    [i] Killing clipboard forwarder, PID: 7878... DONE
+    [i] Killing Xephyr, PID: 7870... DONE
     [i] All done. Bye!
