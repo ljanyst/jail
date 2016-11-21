@@ -63,6 +63,16 @@ function run()
   echo "OK"
 }
 
+function runNE()
+{
+  eval $@
+  if [ $? -ne 0 ]; then
+    echo "FAILED"
+  else
+    echo "OK"
+  fi
+}
+
 #-------------------------------------------------------------------------------
 # Check the software
 #-------------------------------------------------------------------------------
@@ -213,12 +223,13 @@ PID_FORWARDER=$!
 # Run docker
 #-------------------------------------------------------------------------------
 echo -n "[i] Running docker... "
-eval "docker run -it $CONT_ARGS $CONT_NAME > $LOG_OUT 2> $LOG_ERR"
-if [ $? -ne 0 ]; then
-  echo "FAILED"
-else
-  echo "DONE"
-fi
+runNE "docker run -it $CONT_ARGS $CONT_NAME > $LOG_OUT 2> $LOG_ERR"
+
+CONT_IDS="`docker ps -a | grep $CONT_NAME | awk '{print $1}'`"
+for CONT_ID in $CONT_IDS; do
+  echo -n "[i] Removing container $CONT_ID... "
+  runNE "docker rm $CONT_ID >/dev/null"
+done
 
 #-------------------------------------------------------------------------------
 # The container is done, kill everyone
