@@ -200,11 +200,11 @@ function clipForward()
     CLIP1NEW=`xsel -o -b --display $1`
     CLIP2NEW=`xsel -o -b --display $2`
     if [ "x$CLIP1" != "x$CLIP1NEW" ]; then
-      echo $CLIP1NEW | xsel -i -b --display $2
+      xsel -o -b --display $1 | xsel -i -b --display $2
       CLIP1=$CLIP1NEW
     fi;
     if [ x"$CLIP2" != x"$CLIP2NEW" ]; then
-      echo $CLIP2NEW | xsel -i -b --display $1
+      xsel -o -b --display $2 | xsel -i -b --display $1
       CLIP2=$CLIP2NEW
     fi
     sleep 1
