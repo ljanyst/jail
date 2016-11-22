@@ -10,6 +10,8 @@ much like this:
 
 ![Jail](https://raw.githubusercontent.com/ljanyst/jail/master/screenshot.png)
 
+Have a look here for more details: [http://jany.st/post/2016-11-22-containing-gui-application-with-docker.html](http://jany.st/post/2016-11-22-containing-gui-application-with-docker.html)
+
 Usage
 -----
 
