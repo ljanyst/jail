@@ -23,7 +23,7 @@ HOME_DIR=$HOME/Apps/jail
 LOG_DIR=$HOME_DIR/logs
 CONT_HOSTNAME=jail
 CONT_HOME=$HOME/Contained/jail/home
-CONT_NAME=jail:v07
+CONT_NAME=jail:v01
 CONT_DEVICES=
 CONT_USB=
 CONT_PULSE_ACL=172.17.0.0/16
@@ -183,12 +183,7 @@ Xephyr :$JAIL_DISPLAY -ac -br -screen $CONT_RESOLUTION -resizeable > $LOG_OUT 2>
 # wait and see if the signal is deliverable to check whether it's alive
 PID_XEPHYR=$!
 sleep 1
-kill -0 $PID_XEPHYR > /dev/null 2> /dev/null
-if [ $? -ne 0 ]; then
-  echo "FAILED"
-  exit 1
-fi
-echo "OK"
+run "kill -0 $PID_XEPHYR > /dev/null 2> /dev/null"
 
 # pass the display variable and forward the appropriate socket
 CONT_ARGS="$CONT_ARGS -e DISPLAY=:$JAIL_DISPLAY"
@@ -243,7 +238,7 @@ exec 2> /dev/null  # 2 now points to /dev/null
 echo -n "[i] Killing clipboard forwarder, PID: $PID_FORWARDER... "
 kill $PID_FORWARDER > /dev/null 2> /dev/null
 wait $PID_FORWARDER
-echo "DONE"
+echo "OK"
 
 exec 2>&3          # restore stderr to saved
 exec 3>&-          # close saved version
@@ -251,6 +246,6 @@ exec 3>&-          # close saved version
 echo -n "[i] Killing Xephyr, PID: $PID_XEPHYR... "
 kill $PID_XEPHYR > /dev/null 2>/dev/null
 wait $PID_XEPHYR
-echo "DONE"
+echo "OK"
 
 echo "[i] All done. Bye!"
