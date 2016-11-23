@@ -21,6 +21,7 @@
 #-------------------------------------------------------------------------------
 HOME_DIR=$HOME/Apps/jail
 LOG_DIR=$HOME_DIR/logs
+CONFIG=$HOME_DIR/jail.cfg
 CONT_HOSTNAME=jail
 CONT_HOME=$HOME/Contained/jail/home
 CONT_NAME=jail:v01
@@ -29,11 +30,15 @@ CONT_USB=
 CONT_PULSE_ACL=172.17.0.0/16
 CONT_RESOLUTION=1024x768
 
+if [ $# -eq 1 ]; then
+  CONFIG=$HOME_DIR/${1}.cfg
+fi
+
 #-------------------------------------------------------------------------------
 # Import settings from a file and build initial arguments
 #-------------------------------------------------------------------------------
-if [ -r $HOME_DIR/jail.cfg ]; then
-  . $HOME_DIR/jail.cfg
+if [ -r $CONFIG ]; then
+  . $CONFIG
 fi
 
 CONT_ARGS="           -v /etc/localtime:/etc/localtime"
@@ -78,6 +83,7 @@ function runNE()
 #-------------------------------------------------------------------------------
 STAMP=`date +%Y%m%d-%H%M%S`
 echo "[i] Running jail: $STAMP"
+echo "[i] Config: $CONFIG"
 echo "[i] Container: $CONT_NAME"
 echo "[i] Hostname: $CONT_HOSTNAME"
 echo "[i] Home: $CONT_HOME"
