@@ -10,8 +10,9 @@ dbus-daemon --system --fork
 
 # set up xfce
 mkdir -p /home/prisoner/.config/xfce4
+chown prisoner:prisoner -R /home/prisoner
 XINITRC=/home/prisoner/.config/xfce4/xinitrc
-rm $XINITRC
+rm -f $XINITRC
 
 echo -e "#!/bin/sh\n\n" >> $XINITRC
 echo -e "export PULSE_SERVER=$PULSE_SERVER\n\n" >> $XINITRC
