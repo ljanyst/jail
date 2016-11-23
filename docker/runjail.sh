@@ -8,6 +8,9 @@ echo "Pulse server is: $PULSE_SERVER"
 mkdir /var/run/dbus
 dbus-daemon --system --fork
 
+# add the host's ip to /etc/hosts
+echo -e "\n$PULSE_SERVER guard\n" >> /etc/hosts
+
 # set up xfce
 mkdir -p /home/prisoner/.config/xfce4
 chown prisoner:prisoner -R /home/prisoner
