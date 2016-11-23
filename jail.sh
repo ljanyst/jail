@@ -226,7 +226,7 @@ PID_FORWARDER=$!
 echo -n "[i] Running docker... "
 runNE "docker run -it $CONT_ARGS $CONT_NAME > $LOG_OUT 2> $LOG_ERR"
 
-CONT_IDS="`docker ps -a | grep $CONT_NAME | awk '{print $1}'`"
+CONT_IDS="`docker ps -a | grep $CONT_NAME | grep -v Up | awk '{print $1}'`"
 for CONT_ID in $CONT_IDS; do
   echo -n "[i] Removing container $CONT_ID... "
   runNE "docker rm $CONT_ID >/dev/null"
