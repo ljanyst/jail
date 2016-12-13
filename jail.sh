@@ -120,57 +120,65 @@ LOG_OUT=$LOG_DIR/jail-log-$STAMP.$LOG
 LOG_ERR=$LOG_DIR/jail-log-$STAMP.$LOG
 
 #-------------------------------------------------------------------------------
-# Check if the container home exists
+# Set up the container
 #-------------------------------------------------------------------------------
-if [ ! -x $CONT_HOME/prisoner ]; then
-  echo -n "[i] Creating the home dir: ${CONT_HOME}/prisoner... "
-  run mkdir -p $CONT_HOME/prisoner
-fi
-
-#-------------------------------------------------------------------------------
-# Set up PulseAudio
-#-------------------------------------------------------------------------------
-if [ x"$CONT_PULSE_SERVER" == x ]; then
-  IFCFG=`/sbin/ifconfig | grep 172.17`
-  CONT_PULSE_SERVER=`echo $IFCFG | awk '{print $2}' | grep 172.17`
-fi
-
-if [ x"$CONT_PULSE_SERVER" == x ]; then
-  echo "[!] Unable to auto-detect the PulseAudio server."
-  exit 1
-fi
-
-echo -n "[i] Setting up the local PulseAudio server ($CONT_PULSE_SERVER)... "
-run "pactl load-module module-native-protocol-tcp auth-ip-acl=$CONT_PULSE_ACL > /dev/null 2>/dev/null"
-CONT_ARGS="$CONT_ARGS -e PULSE_SERVER=$CONT_PULSE_SERVER"
-
-#-------------------------------------------------------------------------------
-# Attach the devices
-#-------------------------------------------------------------------------------
-for DEV in $CONT_DEVICES; do
-  if [ ! -e $DEV ]; then
-    echo "[!] Device $DEV not present"
-    continue
+function setUpContainer()
+{
+  #-----------------------------------------------------------------------------
+  # Check if the container home exists
+  #-----------------------------------------------------------------------------
+  if [ ! -x $CONT_HOME/prisoner ]; then
+    echo -n "[i] Creating the home dir: ${CONT_HOME}/prisoner... "
+    run mkdir -p $CONT_HOME/prisoner
   fi
-  echo "[i] Attaching device $DEV"
-  CONT_ARGS="$CONT_ARGS --device=$DEV"
-done
 
-#-------------------------------------------------------------------------------
-# Attach USB devices
-#-------------------------------------------------------------------------------
-for DEVID in $CONT_USB; do
-  DEVSTR=`lsusb -d $DEVID`
-  if [ $? -ne 0 ]; then
-    echo "[i] USB device $DEVID not present"
-    continue
+  #-----------------------------------------------------------------------------
+  # Set up PulseAudio
+  #-----------------------------------------------------------------------------
+  if [ x"$CONT_PULSE_SERVER" == x ]; then
+    IFCFG=`/sbin/ifconfig | grep 172.17`
+    CONT_PULSE_SERVER=`echo $IFCFG | awk '{print $2}' | grep 172.17`
   fi
-  USBBUS=`echo $DEVSTR | awk '{print $2}'`
-  USBDEV=`echo $DEVSTR | awk '{print $4}' | tr -d ':'`
-  DEV=/dev/bus/usb/$USBBUS/$USBDEV
-  echo "[i] Attaching USB device $DEVID as $DEV"
-  CONT_ARGS="$CONT_ARGS --device=$DEV"
-done
+
+  if [ x"$CONT_PULSE_SERVER" == x ]; then
+    echo "[!] Unable to auto-detect the PulseAudio server."
+    exit 1
+  fi
+
+  echo -n "[i] Setting up the local PulseAudio server ($CONT_PULSE_SERVER)... "
+  run "pactl load-module module-native-protocol-tcp auth-ip-acl=$CONT_PULSE_ACL > /dev/null 2>/dev/null"
+  CONT_ARGS="$CONT_ARGS -e PULSE_SERVER=$CONT_PULSE_SERVER"
+
+  #-----------------------------------------------------------------------------
+  # Attach the devices
+  #-----------------------------------------------------------------------------
+  for DEV in $CONT_DEVICES; do
+    if [ ! -e $DEV ]; then
+      echo "[!] Device $DEV not present"
+      continue
+    fi
+    echo "[i] Attaching device $DEV"
+    CONT_ARGS="$CONT_ARGS --device=$DEV"
+  done
+
+  #-----------------------------------------------------------------------------
+  # Attach USB devices
+  #-----------------------------------------------------------------------------
+  for DEVID in $CONT_USB; do
+    DEVSTR=`lsusb -d $DEVID`
+    if [ $? -ne 0 ]; then
+      echo "[i] USB device $DEVID not present"
+      continue
+    fi
+    USBBUS=`echo $DEVSTR | awk '{print $2}'`
+    USBDEV=`echo $DEVSTR | awk '{print $4}' | tr -d ':'`
+    DEV=/dev/bus/usb/$USBBUS/$USBDEV
+    echo "[i] Attaching USB device $DEVID as $DEV"
+    CONT_ARGS="$CONT_ARGS --device=$DEV"
+  done
+}
+
+setUpContainer
 
 #-------------------------------------------------------------------------------
 # Find a free display and run Xephyr
@@ -223,14 +231,19 @@ PID_FORWARDER=$!
 #-------------------------------------------------------------------------------
 # Run docker
 #-------------------------------------------------------------------------------
-echo -n "[i] Running docker... "
-runNE "docker run -it $CONT_ARGS $CONT_NAME > $LOG_OUT 2> $LOG_ERR"
+function runDocker()
+{
+  echo -n "[i] Running docker... "
+  runNE "docker run -it $CONT_ARGS $CONT_NAME > $LOG_OUT 2> $LOG_ERR"
 
-CONT_IDS="`docker ps -a | grep $CONT_NAME | grep -v Up | awk '{print $1}'`"
-for CONT_ID in $CONT_IDS; do
-  echo -n "[i] Removing container $CONT_ID... "
-  runNE "docker rm $CONT_ID >/dev/null"
-done
+  CONT_IDS="`docker ps -a | grep $CONT_NAME | grep -v Up | awk '{print $1}'`"
+  for CONT_ID in $CONT_IDS; do
+    echo -n "[i] Removing container $CONT_ID... "
+    runNE "docker rm $CONT_ID >/dev/null"
+  done
+}
+
+runDocker
 
 #-------------------------------------------------------------------------------
 # The container is done, kill everyone
