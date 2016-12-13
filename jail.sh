@@ -20,6 +20,7 @@
 # Variables
 #-------------------------------------------------------------------------------
 HOME_DIR=$HOME/Apps/jail
+JAIL_TYPE=container
 LOG_DIR=$HOME_DIR/logs
 CONFIG=$HOME_DIR/jail.cfg
 CONT_HOSTNAME=jail
@@ -29,6 +30,9 @@ CONT_DEVICES=
 CONT_USB=
 CONT_PULSE_ACL=172.17.0.0/16
 CONT_RESOLUTION=1024x768
+
+USER_NAME=prisoner
+USER_COMMAND=startxfce4
 
 if [ $# -eq 1 ]; then
   CONFIG=$HOME_DIR/${1}.cfg
@@ -44,6 +48,18 @@ fi
 CONT_ARGS="           -v /etc/localtime:/etc/localtime"
 CONT_ARGS="$CONT_ARGS -v $CONT_HOME:/home"
 CONT_ARGS="$CONT_ARGS -h $CONT_HOSTNAME"
+
+USER_ARGS=
+
+if [ x$JAIL_TYPE == x"user" ]; then
+  FUNC_SETUP=setUpUser
+  FUNC_JAIL=runUser
+  FUNC_INFO=infoUser
+else
+  FUNC_SETUP=setUpContainer
+  FUNC_JAIL=runContainer
+  FUNC_INFO=infoContainer
+fi
 
 #-------------------------------------------------------------------------------
 # Utilities
@@ -84,9 +100,21 @@ function runNE()
 STAMP=`date +%Y%m%d-%H%M%S`
 echo "[i] Running jail: $STAMP"
 echo "[i] Config: $CONFIG"
-echo "[i] Container: $CONT_NAME"
-echo "[i] Hostname: $CONT_HOSTNAME"
-echo "[i] Home: $CONT_HOME"
+echo "[i] Jail type: $JAIL_TYPE"
+function infoContainer()
+{
+  echo "[i] Container: $CONT_NAME"
+  echo "[i] Hostname: $CONT_HOSTNAME"
+  echo "[i] Home: $CONT_HOME"
+}
+
+function infoUser()
+{
+  echo "[i] User name: $USER_NAME"
+  echo "[i] User command: $USER_COMMAND"
+}
+
+$FUNC_INFO
 
 for PROG in Xephyr docker xsel pactl lsusb awk; do
   if test x`findProg $PROG` = x; then
@@ -178,7 +206,28 @@ function setUpContainer()
   done
 }
 
-setUpContainer
+#-------------------------------------------------------------------------------
+# Set up the user jail
+#-------------------------------------------------------------------------------
+function setUpUser()
+{
+  getent passwd $USER_NAME >/dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo "[!] User account $USER_NAME does not exist"
+    exit 1
+  fi
+
+  for PROG in sudo $USER_COMMAND; do
+    if test x`findProg $PROG` = x; then
+      echo "[!] Unable to find $PROG. Bye!"
+      exit 1
+    fi
+  done
+
+  USER_ARGS="sudo -u $USER_NAME $USER_COMMAND"
+}
+
+$FUNC_SETUP
 
 #-------------------------------------------------------------------------------
 # Find a free display and run Xephyr
@@ -231,7 +280,7 @@ PID_FORWARDER=$!
 #-------------------------------------------------------------------------------
 # Run docker
 #-------------------------------------------------------------------------------
-function runDocker()
+function runContainer()
 {
   echo -n "[i] Running docker... "
   runNE "docker run -it $CONT_ARGS $CONT_NAME > $LOG_OUT 2> $LOG_ERR"
@@ -243,7 +292,21 @@ function runDocker()
   done
 }
 
-runDocker
+#-------------------------------------------------------------------------------
+# Run user
+#-------------------------------------------------------------------------------
+function runUser()
+{
+  echo -n "[i] Running sudo... "
+  runNE "DISPLAY=:$JAIL_DISPLAY $USER_ARGS > $LOG_OUT 2> $LOG_ERR"
+
+  echo -n "[i] Killing all the processes of $USER_NAME... "
+  KILL_PROGS="ps aux | awk '{print \$1 \" \" \$2}' | grep $USER_NAME |"
+  KILL_PROGS="$KILL_PROGS awk '{print \$2}' | sudo -u $USER_NAME xargs kill -9"
+  run $KILL_PROGS
+}
+
+$FUNC_JAIL
 
 #-------------------------------------------------------------------------------
 # The container is done, kill everyone
