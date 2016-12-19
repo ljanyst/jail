@@ -303,6 +303,7 @@ function runUser()
   echo -n "[i] Killing all the processes of $USER_NAME... "
   KILL_PROGS="ps aux | awk '{print \$1 \" \" \$2}' | grep $USER_NAME |"
   KILL_PROGS="$KILL_PROGS awk '{print \$2}' | sudo -u $USER_NAME xargs kill -9"
+  KILL_PROGS="$KILL_PROGS && true"
   run $KILL_PROGS
 }
 
