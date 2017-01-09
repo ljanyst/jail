@@ -22,7 +22,7 @@ Container Jail
 --------------
 
 You need to build the *Docker* image before you can do anything else. Go to the
-*docker* subdir and type:
+*docker/default* subdir and type:
 
     docker build -t jail:v01 .
 
