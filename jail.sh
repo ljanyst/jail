@@ -213,6 +213,15 @@ function setUpContainer()
     echo "[i] Attaching USB device $DEVID as $DEV"
     CONT_ARGS="$CONT_ARGS --device=$DEV"
   done
+
+  #-----------------------------------------------------------------------------
+  # Publish container ports
+  #-----------------------------------------------------------------------------
+  for PORT in $CONT_PUBLISH_PORTS; do
+    echo "[i] Publishing port: $PORT"
+    CONT_ARGS="$CONT_ARGS -p $PORT"
+  done
+
 }
 
 #-------------------------------------------------------------------------------
