@@ -30,6 +30,7 @@ CONT_DEVICES=
 CONT_USB=
 CONT_PULSE_ACL=172.17.0.0/16
 CONT_RESOLUTION=1024x768
+CONT_IP=0.0.0.0
 
 USER_NAME=prisoner
 USER_COMMAND=startxfce4
@@ -48,6 +49,10 @@ fi
 CONT_ARGS="           -v /etc/localtime:/etc/localtime"
 CONT_ARGS="$CONT_ARGS -v $CONT_HOME:/home"
 CONT_ARGS="$CONT_ARGS -h $CONT_HOSTNAME"
+
+if [ x"$CONT_NET" != x ]; then
+  CONT_ARGS="$CONT_ARGS --net $CONT_NET --ip $CONT_IP"
+fi
 
 USER_ARGS=
 
@@ -106,6 +111,10 @@ function infoContainer()
   echo "[i] Container: $CONT_NAME"
   echo "[i] Hostname: $CONT_HOSTNAME"
   echo "[i] Home: $CONT_HOME"
+  if [ x"$CONT_NET" != x ]; then
+    echo "[i] Network: $CONT_NET"
+    echo "[i] IP Address: $CONT_IP"
+  fi
 }
 
 function infoUser()
