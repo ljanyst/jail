@@ -11,6 +11,11 @@ dbus-daemon --system --fork
 # add the host's ip to /etc/hosts
 echo -e "\n$PULSE_SERVER guard\n" >> /etc/hosts
 
+# ssh
+mkdir /var/run/sshd
+chmod 0755 /var/run/sshd
+/usr/sbin/sshd
+
 # set up xfce
 mkdir -p /home/prisoner/.config/xfce4
 chown prisoner:prisoner -R /home/prisoner

@@ -9,7 +9,7 @@ RUN apt-get -y update && \
     apt-get -y dist-upgrade && \
     apt-get -y install sudo xterm zsh git usbutils mc stow wget pciutils \
                        net-tools telnet apt-transport-https ca-certificates \
-                       curl gnupg
+                       curl gnupg openssh-server
 
 #-------------------------------------------------------------------------------
 # Install XFCE and some fonts
@@ -33,5 +33,7 @@ COPY runjail.sh /usr/bin/runjail.sh
 
 RUN useradd -G sudo,video,plugdev -s /usr/bin/zsh prisoner && \
     echo "prisoner ALL=NOPASSWD: ALL" >> /etc/sudoers
+
+EXPOSE 22
 
 CMD /usr/bin/runjail.sh
