@@ -31,6 +31,7 @@ RUN apt-get -y install iceweasel
 #-------------------------------------------------------------------------------
 COPY runjail.sh /usr/bin/runjail.sh
 
-RUN useradd -G sudo,video,plugdev -s /usr/bin/zsh prisoner
+RUN useradd -G sudo,video,plugdev -s /usr/bin/zsh prisoner && \
+    echo "prisoner ALL=NOPASSWD: ALL" >> /etc/sudoers
 
 CMD /usr/bin/runjail.sh
