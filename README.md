@@ -22,9 +22,9 @@ Container Jail
 --------------
 
 You need to build the *Docker* image before you can do anything else. Go to the
-*docker/default* subdir and type:
+*docker* subdir and type:
 
-    docker build -t jail:v01 .
+    ./build-containers.sh
 
 You can adjust the *Docker* tag and other things in the *jail.cfg* configuration
 file. After the docker image is ready, you can run *jail.sh*:
